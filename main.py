@@ -45,7 +45,7 @@ class World():
     
 
 def draw_grid():
-    for line in range(0, 6):
+    for line in range(0, int(screen_width/tile_size + 1)):
         pygame.draw.line(screen, (255, 255, 255), (0, line*tile_size), (screen_width, line * tile_size))
         pygame.draw.line(screen, (255, 255, 255), (line*tile_size, 0), (line * tile_size, screen_height))
 
@@ -76,7 +76,11 @@ bg_img = pygame.image.load('img/sky.png')
 
 run = True
 
-while True: 
+while True:
+
+    for event in pygame.event.get():
+        if event.type == QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+            exit()
 
     screen.blit(bg_img, (0 ,0))
     screen.blit(sun_img, (100, 100))
@@ -84,10 +88,6 @@ while True:
     world.draw()
 
     draw_grid()
-
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            exit()
 
     pygame.display.update()
 

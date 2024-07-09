@@ -9,7 +9,7 @@ clock = pygame.time.Clock()
 fps = 60
 
 #game window
-tile_size = 50
+tile_size = 32
 cols = 20
 margin = 100
 screen_width = tile_size * cols
