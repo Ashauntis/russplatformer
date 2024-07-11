@@ -3,7 +3,7 @@ from pygame.locals import *
 import sys
 
 pygame.init()
-
+DEBUG = False
 clock = pygame.time.Clock()
 fps = 60
 
@@ -44,6 +44,8 @@ class World():
                     img_rect.y = row_count * tile_size
                     tile = (img, img_rect)
                     self.tile_list.append(tile)
+                if tile == 3:
+                    blob_group.add(Enemy(col_count * tile_size, row_count * tile_size + 15))                
 
                 # increase our grid counters
                 col_count += 1 
@@ -52,7 +54,32 @@ class World():
     def draw(self):
         for tile in self.tile_list:
             screen.blit(tile[0], tile[1])
-            pygame.draw.rect(screen, (255, 255, 255), tile[1], 2)
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        
+        self.image = pygame.image.load('img/blob.png')
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.move_direction = 1
+        self.move_counter = 0
+
+    def update(self):
+        self.rect.x += self.move_direction
+        self.move_counter += 1
+        # 
+        #   0 -> 51
+        # -51 -> 51, 
+        # -51 -> 51
+        if abs(self.move_counter) > 50:
+            self.move_direction *= -1
+            self.move_counter *= -1
+
+
+
+        
 
 class Player():
     def __init__(self, x, y):
@@ -147,12 +174,22 @@ class Player():
 
         # draw our player
         screen.blit(self.image, self.rect)
-        pygame.draw.rect(screen, (255, 255, 255), self.rect, 2)
 
 def draw_grid():
     for line in range(0, int(screen_width/tile_size + 1)):
         pygame.draw.line(screen, (255, 255, 255), (0, line*tile_size), (screen_width, line * tile_size))
         pygame.draw.line(screen, (255, 255, 255), (line*tile_size, 0), (line * tile_size, screen_height))
+
+def draw_debug_outlines():
+    if DEBUG:
+        pygame.draw.rect(screen, (255, 255, 255), player.rect, 2)
+        for tile in world.tile_list:
+            pygame.draw.rect(screen, (255, 255, 255), tile[1], 2)
+        for b in blob_group:
+            pygame.draw.rect(screen, (255, 255, 255), b.rect, 2)
+
+
+
 
 ########## GAME LOGIC ##########
 
@@ -182,6 +219,7 @@ world_data = [
 ]
 
 
+blob_group = pygame.sprite.Group()
 world = World(world_data)
 player = Player(100, screen_height - 130)
 
@@ -192,6 +230,8 @@ bg_img = pygame.image.load('img/sky.png')
 
 run = True
 
+
+
 while run:
 
     clock.tick(fps)
@@ -200,6 +240,8 @@ while run:
     screen.blit(sun_img, (100, 100))
 
     world.draw()
+    blob_group.update()
+    blob_group.draw(screen)
 
     player.update()
 
@@ -207,9 +249,9 @@ while run:
         if event.type == QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
             run = False
 
-
-    # draw_grid()
+    draw_debug_outlines()
 
     pygame.display.update()
 
 pygame.quit()
+
