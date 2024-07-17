@@ -1,0 +1,13 @@
+{
+    "cSpell.words": [
+        "blit",
+        "collidepoint",
+        "colliderect",
+        "cooldown",
+        "FULLSCREEN",
+        "KEYDOWN",
+        "Platformer",
+        "pygame",
+        "spritecollide"
+    ]
+}
