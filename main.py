@@ -12,6 +12,7 @@ screen_height = 1000
 
 tile_size = 50
 game_over = 0
+main_menu = True
 
 screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.SCALED)
 pygame.display.set_caption("Platformer")
@@ -315,6 +316,8 @@ world_data = [
 sun_img = pygame.image.load('img/sun.png')
 bg_img = pygame.image.load('img/sky.png')
 restart_img = pygame.image.load('img/restart_btn.png')
+start_img = pygame.image.load('img/start_btn.png')
+exit_img = pygame.image.load('img/exit_btn.png')
 
 blob_group = pygame.sprite.Group()
 lava_group = pygame.sprite.Group()
@@ -323,6 +326,8 @@ player = Player(100, screen_height - 130)
 
 # buttons
 restart_button = Button(screen_width // 2 -50, screen_height // 2 - 100, restart_img)
+start_button = Button(screen_width // 2 - 350, screen_height // 2, start_img)
+exit_button = Button(screen_width // 2 + 150, screen_height // 2, exit_img)
 
 run = True
 
@@ -333,21 +338,29 @@ while run:
     screen.blit(bg_img, (0 ,0))
     screen.blit(sun_img, (100, 100))
 
-    world.draw()
-    blob_group.update()
-    blob_group.draw(screen)
-    lava_group.draw(screen)
+    if main_menu:
+        if exit_button.draw():
+            run = False
+        if start_button.draw():
+            main_menu = False
+    else:
+        world.draw()
+        blob_group.update()
+        blob_group.draw(screen)
+        lava_group.draw(screen)
 
-    game_over = player.update(game_over)
-    if game_over:
-        if restart_button.draw():
-            player.reset(100, screen_height - 130)
-            world.reset(world_data)
-            game_over = 0
+        game_over = player.update(game_over)
+        if game_over:
+            if restart_button.draw():
+                player.reset(100, screen_height - 130)
+                world.reset(world_data)
+                game_over = 0
 
     for event in pygame.event.get():
-        if event.type == QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+        if event.type == QUIT:
             run = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            main_menu = True
 
     draw_debug_outlines()
 
