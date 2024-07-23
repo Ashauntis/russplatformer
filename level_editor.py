@@ -20,20 +20,20 @@ pygame.display.set_caption('Level Editor')
 
 
 #load images
-sun_img = pygame.image.load('img/sun.png')
+sun_img = pygame.image.load('assets/img/sun.png')
 sun_img = pygame.transform.scale(sun_img, (tile_size, tile_size))
-bg_img = pygame.image.load('img/sky.png')
+bg_img = pygame.image.load('assets/img/sky.png')
 bg_img = pygame.transform.scale(bg_img, (screen_width, screen_height - margin))
-dirt_img = pygame.image.load('img/dirt.png')
-grass_img = pygame.image.load('img/grass.png')
-blob_img = pygame.image.load('img/blob.png')
-platform_x_img = pygame.image.load('img/platform_x.png')
-platform_y_img = pygame.image.load('img/platform_y.png')
-lava_img = pygame.image.load('img/lava.png')
-coin_img = pygame.image.load('img/coin.png')
-exit_img = pygame.image.load('img/exit.png')
-save_img = pygame.image.load('img/save_btn.png')
-load_img = pygame.image.load('img/load_btn.png')
+dirt_img = pygame.image.load('assets/img/dirt.png')
+grass_img = pygame.image.load('assets/img/grass.png')
+blob_img = pygame.image.load('assets/img/blob.png')
+platform_x_img = pygame.image.load('assets/img/platform_x.png')
+platform_y_img = pygame.image.load('assets/img/platform_y.png')
+lava_img = pygame.image.load('assets/img/lava.png')
+coin_img = pygame.image.load('assets/img/coin.png')
+exit_img = pygame.image.load('assets/img/exit.png')
+save_img = pygame.image.load('assets/img/save_btn.png')
+load_img = pygame.image.load('assets/img/load_btn.png')
 
 
 #define game variables
@@ -157,13 +157,13 @@ while run:
 	#load and save level
 	if save_button.draw():
 		#save level data
-		pickle_out = open(f'level{level}_data', 'wb')
+		pickle_out = open(f'level_data/level{level}_data', 'wb')
 		pickle.dump(world_data, pickle_out)
 		pickle_out.close()
 	if load_button.draw():
 		#load in level data
-		if path.exists(f'level{level}_data'):
-			pickle_in = open(f'level{level}_data', 'rb')
+		if path.exists(f'level_data/level{level}_data'):
+			pickle_in = open(f'level_data/level{level}_data', 'rb')
 			world_data = pickle.load(pickle_in)
 
 

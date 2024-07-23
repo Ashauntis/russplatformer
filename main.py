@@ -1,4 +1,5 @@
 import pygame
+from config import *
 from pygame import mixer
 from pygame.locals import *
 import pickle
@@ -11,20 +12,9 @@ DEBUG = False
 clock = pygame.time.Clock()
 fps = 60
 
-screen_width = 1000
-screen_height = 1000
-
-# UI variables
-font = pygame.font.SysFont('Impact', 120)
-font_score = pygame.font.SysFont('Verdana', 30)
-
-white = (255, 255, 255)
-
-tile_size = 50
 game_over = 0
 main_menu = True
 level = 0
-max_level = 7
 score = 0
 
 screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.SCALED)
@@ -37,8 +27,8 @@ class World():
         self.tile_list: list[tuple[pygame.surface.Surface, pygame.rect.Rect]] = []
 
         # load images
-        dirt_img = pygame.image.load('img/dirt.png')
-        grass_img = pygame.image.load('img/grass.png')
+        dirt_img = pygame.image.load('assets/img/dirt.png')
+        grass_img = pygame.image.load('assets/img/grass.png')
 
         row_count = 0
         for row in data: 
@@ -84,7 +74,7 @@ class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, move_x, move_y):
         pygame.sprite.Sprite.__init__(self)
 
-        self.image = pygame.transform.scale(pygame.image.load('img/platform.png'), (tile_size, tile_size // 2))
+        self.image = pygame.transform.scale(pygame.image.load('assets/img/platform.png'), (tile_size, tile_size // 2))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -107,7 +97,7 @@ class Lava(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
 
-        self.image = pygame.transform.scale(pygame.image.load('img/lava.png'), (tile_size, tile_size // 2))
+        self.image = pygame.transform.scale(pygame.image.load('assets/img/lava.png'), (tile_size, tile_size // 2))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -116,7 +106,7 @@ class Coin(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
 
-        self.image = pygame.transform.scale(pygame.image.load('img/coin.png'), (tile_size // 2, tile_size // 2))
+        self.image = pygame.transform.scale(pygame.image.load('assets/img/coin.png'), (tile_size // 2, tile_size // 2))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
@@ -124,7 +114,7 @@ class Exit(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
 
-        self.image = pygame.transform.scale(pygame.image.load('img/exit.png'), (tile_size, int(tile_size * 1.5)))
+        self.image = pygame.transform.scale(pygame.image.load('assets/img/exit.png'), (tile_size, int(tile_size * 1.5)))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -134,7 +124,7 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         
-        self.image = pygame.image.load('img/blob.png')
+        self.image = pygame.image.load('assets/img/blob.png')
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -217,12 +207,12 @@ class Player():
         self.images_left = []
         self.index = 0 
         for num in range(1, 5):
-            img = pygame.transform.scale(pygame.image.load(f'img/guy{num}.png'), (40, 80))
+            img = pygame.transform.scale(pygame.image.load(f'assets/img/guy{num}.png'), (40, 80))
             self.images_right.append(img)
             self.images_left.append(pygame.transform.flip(img, flip_x=True, flip_y=False))
         self.counter = 0
         self.image = self.images_right[self.index]
-        self.dead_image = pygame.image.load('img/ghost.png')
+        self.dead_image = pygame.image.load('assets/img/ghost.png')
         self.height = self.image.get_height()
         self.width = self.image.get_width()
 
@@ -373,12 +363,13 @@ def reset_level(level) -> World:
     platform_group.empty()
     coin_group.empty()
     
-    if path.exists(f'level{level}_data'):
-        pickle_in = open(f'level{level}_data', 'rb')
+    if path.exists(f'level_data/level{level}_data'):
+        pickle_in = open(f'level_data/level{level}_data', 'rb')
+        print(f'Loading level {level}')
     else:
-        pickle_in = open(f'level1_data', 'rb')
+        pickle_in = open(f'level_data/level0_data', 'rb')
+        print(f'Failed to find data file for level {level}. Loading level 0.')
     world_data = pickle.load(pickle_in)
-    print(f'Loading level {level}')
     world = World(world_data)
 
     return world
@@ -404,20 +395,20 @@ def draw_debug_outlines():
 ########## GAME LOGIC ##########
 
 # Load our images
-sun_img = pygame.image.load('img/sun.png')
-bg_img = pygame.image.load('img/sky.png')
-restart_img = pygame.image.load('img/restart_btn.png')
-start_img = pygame.image.load('img/start_btn.png')
-exit_img = pygame.image.load('img/exit_btn.png')
+sun_img = pygame.image.load('assets/img/sun.png')
+bg_img = pygame.image.load('assets/img/sky.png')
+restart_img = pygame.image.load('assets/img/restart_btn.png')
+start_img = pygame.image.load('assets/img/start_btn.png')
+exit_img = pygame.image.load('assets/img/exit_btn.png')
 
 # Load our sounds
-pygame.mixer.music.load('img/music.wav')
-#  pygame.mixer.music.play(-1, 0.0, 5000)
-coin_fx = pygame.mixer.Sound('img/coin.wav')
+pygame.mixer.music.load('assets/audio/music.wav')
+pygame.mixer.music.play(-1, 0.0, 5000)
+coin_fx = pygame.mixer.Sound('assets/audio/coin.wav')
 coin_fx.set_volume(0.5)
-jump_fx = pygame.mixer.Sound('img/jump.wav')
+jump_fx = pygame.mixer.Sound('assets/audio/jump.wav')
 jump_fx.set_volume(0.5)
-game_over_fx = pygame.mixer.Sound('img/game_over.wav')
+game_over_fx = pygame.mixer.Sound('assets/audio/game_over.wav')
 game_over_fx.set_volume(0.5)
 
 blob_group = pygame.sprite.Group()
