@@ -6,6 +6,8 @@
         "cooldown",
         "FULLSCREEN",
         "KEYDOWN",
+        "levelexit",
+        "movingplatform",
         "Platformer",
         "pygame",
         "spritecollide"

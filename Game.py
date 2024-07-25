@@ -7,6 +7,7 @@ import pickle
 
 from config import *
 
+from levelexit import LevelExit
 from player import Player
 from world import World
 from coin import Coin
@@ -16,11 +17,16 @@ from button import Button
 class Game:
     def __init__(self):
 
+        pygame.font.init()
         pygame.mixer.pre_init(44100, -16, 2, 512)
         pygame.init()
         mixer.init()
         self.fps = 60
         self.clock = pygame.time.Clock()
+        self.font_game_over = pygame.font.SysFont(
+            font_game_over_face, font_game_over_size
+        )
+        self.font_score = pygame.font.SysFont(font_score_face, font_score_size)
 
         self.screen = pygame.display.set_mode(
             (screen_width, screen_height), pygame.FULLSCREEN | pygame.SCALED
@@ -85,22 +91,24 @@ class Game:
         self.screen.blit(self.bg_img, (0, 0))
         self.screen.blit(self.sun_img, (100, 100))
 
-        if main_menu:
+        if self.main_menu:
             if self.exit_button.draw():
                 run = False
             if self.start_button.draw():
-                main_menu = False
+                self.main_menu = False
         else:
-            world.draw()
+            self.world.draw()
 
-            game_over = self.player.update(game_over)
+            self.game_over = self.player.update(self.game_over)
             # normal game state
-            if game_over == 0:
+            if self.game_over == 0:
                 if pygame.sprite.spritecollide(self.player, self.coin_group, True):
                     self.coin_fx.play()
-                    score += 1
-                    print(f"Score: {score}")
-                self.draw_text("X " + str(score), font_score, white, tile_size - 10, 10)
+                    self.score += 1
+                    print(f"Score: {self.score}")
+                self.draw_text(
+                    "X " + str(self.score), self.font_score, white, tile_size - 10, 10
+                )
                 self.coin_group.draw(self.screen)
                 self.world.blob_group.update()
                 self.world.blob_group.draw(self.screen)
@@ -113,7 +121,7 @@ class Game:
             if self.game_over == -1:
                 self.draw_text(
                     "Game Over!",
-                    font,
+                    self.font_game_over,
                     white,
                     screen_width // 2 - 275,
                     screen_height // 2 - 100,
@@ -128,14 +136,14 @@ class Game:
                 if self.level >= max_level:
                     self.draw_text(
                         "You Win!",
-                        font,
+                        self.font_game_over,
                         white,
                         screen_width // 2 - 240,
                         screen_height // 2 - 175,
                     )
                     self.draw_text(
-                        f"Score: {score}",
-                        font,
+                        f"Score: {self.score}",
+                        self.font_game_over,
                         white,
                         screen_width // 2 - 215,
                         screen_height // 2 - 50,
@@ -157,3 +165,30 @@ class Game:
                 self.main_menu = True
 
         return True
+
+    def draw_text(self, text, font, text_col, x, y):
+        img = font.render(text, True, text_col)
+        self.screen.blit(img, (x, y))
+
+    def draw_grid(self):
+        for line in range(0, int(screen_width / tile_size + 1)):
+            pygame.draw.line(
+                self.screen,
+                (255, 255, 255),
+                (0, line * tile_size),
+                (screen_width, line * tile_size),
+            )
+            pygame.draw.line(
+                self.screen,
+                (255, 255, 255),
+                (line * tile_size, 0),
+                (line * tile_size, screen_height),
+            )
+
+    def draw_debug_outlines(self):
+        if DEBUG:
+            pygame.draw.rect(self.screen, (255, 255, 255), player.rect, 2)
+            for tile in self.world.tile_list:
+                pygame.draw.rect(self.screen, (255, 255, 255), tile[1], 2)
+            for b in self.world.blob_group:
+                pygame.draw.rect(self.screen, (255, 255, 255), b.rect, 2)
