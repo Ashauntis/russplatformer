@@ -35,8 +35,9 @@ class Game:
 
         self.game_over = 0
         self.main_menu = True
-        self.level = 0
+        self.level = start_level
         self.score = 0
+        self.level_score = 0  # score for the current level
 
         # Load our images
         self.sun_img = pygame.image.load("assets/img/sun.png")
@@ -48,16 +49,15 @@ class Game:
         # Load our sounds
         pygame.mixer.music.load("assets/audio/music.wav")
         pygame.mixer.music.play(-1, 0.0, 5000)
-        coin_fx = pygame.mixer.Sound("assets/audio/coin.wav")
-        coin_fx.set_volume(0.5)
-
-        self.world = self.reset_level(self.level)
-        self.player = Player(self, 100, screen_height - 130)
-        self.player.world = self.world
+        self.coin_fx = pygame.mixer.Sound("assets/audio/coin.wav")
+        self.coin_fx.set_volume(0.5)
 
         # Dummy Coin for score
         self.coin_group = pygame.sprite.Group()
         self.coin_group.add(Coin(tile_size // 2, tile_size // 2 + 3))
+
+        self.world = self.reset_level(self.level)
+        self.player = Player(self, 100, screen_height - 130)
 
         # buttons
         self.restart_button = Button(
@@ -93,7 +93,7 @@ class Game:
 
         if self.main_menu:
             if self.exit_button.draw():
-                run = False
+                return False
             if self.start_button.draw():
                 self.main_menu = False
         else:
@@ -102,14 +102,20 @@ class Game:
             self.game_over = self.player.update(self.game_over)
             # normal game state
             if self.game_over == 0:
-                if pygame.sprite.spritecollide(self.player, self.coin_group, True):
+                if pygame.sprite.spritecollide(
+                    self.player, self.world.coin_group, True
+                ):
                     self.coin_fx.play()
-                    self.score += 1
-                    print(f"Score: {self.score}")
+                    self.level_score += 1
                 self.draw_text(
-                    "X " + str(self.score), self.font_score, white, tile_size - 10, 10
+                    "X " + str(self.score + self.level_score),
+                    self.font_score,
+                    white,
+                    tile_size - 10,
+                    10,
                 )
                 self.coin_group.draw(self.screen)
+                self.world.coin_group.draw(self.screen)
                 self.world.blob_group.update()
                 self.world.blob_group.draw(self.screen)
                 self.world.lava_group.draw(self.screen)
@@ -127,12 +133,14 @@ class Game:
                     screen_height // 2 - 100,
                 )
                 if self.restart_button.draw():
-                    self.world = self.reset_level(level)
-                    self.player.reset(100, screen_height - 130)
-                    self.score = 0
+                    self.world = self.reset_level(self.level)
+                    self.player.reset()
+                    self.level_score = 0
                     self.game_over = 0
             # Player has won!
             if self.game_over == 1:
+                self.score += self.level_score
+                self.level_score = 0
                 if self.level >= max_level:
                     self.draw_text(
                         "You Win!",
@@ -152,17 +160,23 @@ class Game:
                         self.level = 0
                         self.score = 0
                         self.world = self.reset_level(self.level)
+                        self.player.reset()
                         self.game_over = 0
                 else:
                     self.level += 1
                     self.world = self.reset_level(self.level)
+                    self.player.reset()
                     self.game_over = 0
+        self.draw_debug_outlines()
 
         for event in pygame.event.get():
             if event.type == QUIT:
                 return False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                self.main_menu = True
+                if self.main_menu:
+                    return False
+                else:
+                    self.main_menu = True
 
         return True
 
@@ -187,8 +201,16 @@ class Game:
 
     def draw_debug_outlines(self):
         if DEBUG:
-            pygame.draw.rect(self.screen, (255, 255, 255), player.rect, 2)
+            pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 2)
+
             for tile in self.world.tile_list:
                 pygame.draw.rect(self.screen, (255, 255, 255), tile[1], 2)
-            for b in self.world.blob_group:
-                pygame.draw.rect(self.screen, (255, 255, 255), b.rect, 2)
+
+            draw_list = [
+                self.world.blob_group,
+                self.world.platform_group,
+            ]
+
+            for item in draw_list:
+                for tile in item:
+                    pygame.draw.rect(self.screen, (255, 255, 255), tile.rect, 2)

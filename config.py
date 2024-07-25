@@ -1,9 +1,10 @@
 screen_height = 1000
 screen_width = 1000
 
-DEBUG = False
+DEBUG = True
 
 tile_size = 50
+start_level = 3
 max_level = 7
 
 # UI variables
