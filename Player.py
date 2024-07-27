@@ -109,10 +109,13 @@ class Player:
             self.in_air = True
             for tile in self.game.world.tile_list:
                 # check for collision in x direction
-                if tile[1].colliderect(
-                    self.rect.x + dx, self.rect.y, self.width, self.height
-                ):
-                    dx = 0
+                if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height):
+                    if dx > 0: #moving right
+                        colliding_right = True
+                        dx = self.rect.right - tile[1].left
+                    else:
+                        colliding_left = True
+                        dx = self.rect.left - tile[1].right
 
                 # check for collision in y direction
                 if tile[1].colliderect(
@@ -122,7 +125,6 @@ class Player:
                     if self.vel_y < 0:
                         dy = tile[1].bottom - self.rect.top
                         self.vel_y = 0
-                        colliding_up = True
 
                     # Check if above the ground ie falling
                     elif self.vel_y > 0:
@@ -130,6 +132,12 @@ class Player:
                         self.vel_y = 0
                         self.in_air = False
                         colliding_down = True
+
+                    # Player is colliding in both directions 
+                    else:
+                        game_over = -1
+                        self.game_over_fx.play()
+
 
             # check for collision with enemies
             if pygame.sprite.spritecollide(self, self.game.world.blob_group, False):
